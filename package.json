@@ -1,8 +1,8 @@
 {
-  "name": "app",
+  "name": "ebb-n-chat",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "A small chat app using pure HTML/CSS and the popular JavaScript library Socket.IO (WebSocket).",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
