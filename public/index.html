@@ -11,12 +11,33 @@
     <script src="../app.js" defer></script> 
 </head>
 <body>
-    <h1 id="titleHeader">Ebb & Chat</h1> 
+    <div id="loadingModal">
+        <div id="loadingModalContent">
+            <h1>Connecting to server</h1>
+            <p>Please wait while we try to connect you to our servers...</p>
+            <div id="loadingModalSpinner"></div> 
+        </div>
+    </div>
+    <div id="titleHeader">
+        <h1>Ebb & Chat</h1> 
+        <p id="roomName"></p> 
+    </div>
     <div id="appContainer">
-        <ul id="msgList"></ul>
+        <div id="sideBar">
+            <ul id="roomList">
+                <li>#general</li> 
+            </ul> 
+        </div>
         <div id="msgContainer">
-            <input id="msgBox" type="text" name="messageBox" placeholder="Message... " value="" /> 
-            <button id="sendBtn">Send</button> 
+            <ul id="msgList"></ul>
+            <div id="inputContainer">
+                <input id="msgBox" type="text" name="messageBox" placeholder="Message... " value="" /> 
+                <button id="sendBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="heroIcon">
+                        <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.925A1.5 1.5 0 005.135 9.25h6.115a.75.75 0 010 1.5H5.135a1.5 1.5 0 00-1.442 1.086l-1.414 4.926a.75.75 0 00.826.95 28.896 28.896 0 0015.293-7.154.75.75 0 000-1.115A28.897 28.897 0 003.105 2.289z" />
+                    </svg>                       
+                </button> 
+            </div>
         </div>
     </div>
 </body>

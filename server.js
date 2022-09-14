@@ -7,7 +7,7 @@ const io = new Server({
     }
 }); 
 
-let messages = []; 
+let messages = {general: [], room1: [], room2: []}; 
 let usernames = {}; 
 
 // setInterval(() => {
@@ -16,13 +16,15 @@ let usernames = {};
 
 io.on("connection", socket => {
     usernames[socket.id] = socket.id; 
-    socket.emit("update", messages); 
+    // socket.join("general"); 
+    // socket.emit("update", messages["general"]); 
+    socket.emit("rooms", Object.keys(messages)); 
 
     socket.on("new_message", data => {
         console.log(data); 
         if (data.msg.startsWith("/nickname")) {
             usernames[socket.id] = data.msg.trim().split(' ')[1]; 
-            messages = messages.map(msg => {
+            messages[data.to] = messages[data.to].map(msg => {
                 let newMsg = msg; 
                 if (msg.id === socket.id) {
                     newMsg.name = usernames[socket.id]; 
@@ -32,10 +34,19 @@ io.on("connection", socket => {
         } else {
             data.id = socket.id; 
             data.name = usernames[socket.id]; 
-            messages.push(data); 
+            data.timestamp = Date.now(); 
+            data.timestampFormatted = new Date(data.timestamp).toLocaleTimeString(); 
+            messages[data.to].push(data); 
         }
 
-        io.emit("update", messages); 
+        io.to(data.to).emit("update", messages[data.to]); 
+    }); 
+
+    socket.on("switchRoom", data => {
+        if (data.from) socket.leave(data.from); 
+        socket.join(data.to); 
+        socket.emit("update", messages[data.to]); 
+        console.log(`Switched user ${socket.id} to room #${data.to}... `); 
     }); 
 }); 
 

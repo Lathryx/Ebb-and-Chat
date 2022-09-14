@@ -12,12 +12,127 @@ body {
     flex-direction: column; 
     background: #242d36; 
     color: white; 
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif; 
+}
+
+#loadingModal {
+    position: absolute; 
+    display: flex; 
+    /* display: none;  */
+    justify-content: center;
+    align-items: center; 
+    /* padding: 0 20px;  */
+    width: 100%; 
+    height: 100%; 
+    background: #242d36; 
+    z-index: 100; 
+}
+#loadingModalContent {
+    padding: 30px; 
+}
+#loadingModalSpinner {
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 100px; 
+    height: 100px; 
+    border: 10px solid rgb(43, 54, 65); 
+    border-top: 10px solid rgb(53, 64, 75); 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite; 
+}
+
+#titleHeader {
+    display: flex; 
+    align-items: center;
+    margin: 0; 
+    padding: 0; 
+    background: rgb(43, 54, 65); 
+    z-index: 10; 
+} 
+#titleHeader h1 {
+    margin: 0; 
+    padding: 15px; 
+    width: fit-content; 
+    font-size: 2.5rem; 
+    font-weight: 700; 
+    background: rgb(43, 54, 65); 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+} 
+#titleHeader h1:hover {
+    background: rgb(53, 64, 75); 
+}
+
+#roomName {
+    margin: 15px; 
+    padding: 0; 
+    /* background: rgb(43, 54, 65);  */
+    color: #a0a0a0; 
 }
 
 #appContainer {
+    position: relative; 
+    display: flex; 
     width: 100%; 
     height: 100%; 
+}
+
+#sideBar {
+    padding: 10px 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    float: left; 
+    width: 25vw; 
+    height: auto; 
+    background: #1e262d; 
+    overflow: hidden; 
+    transition: all 0.2s ease; 
+}
+
+#sideBar:hover + #msgContainer {
+    width: 75vw; 
+    transition-delay: 0.2s; 
+} 
+#sideBar:hover #roomList {
+    opacity: 1; 
+    transition: all 0.2s ease; 
+    transition-delay: 0.2s; 
+}
+
+#roomList {
+    margin: 5px 15px; 
+    padding: 0; 
+    width: 100%; 
+    height: 100%; 
+    opacity: 0; 
+    overflow: hidden; 
+    list-style: none; 
+    transition: all 0.2s ease; 
+}
+
+#roomList li {
+    margin: 10px; 
+    padding: 15px; 
+    width: auto; 
+    background: #1e262d; 
+    cursor: pointer; 
+    border-radius: 15px; 
+    transition: all 0.2s ease; 
+} 
+
+#roomList li:hover {
+    background: #2b3a45; 
+} 
+
+#msgContainer {
+    position: absolute; 
+    right: 0; 
+    width: 95vw; 
+    height: 100%; 
+    background: #242d36; 
+    /* box-shadow: -10px 0px 10px 0 rgba(15, 15, 15, 0.3); */
+    transition: all 0.2s ease; 
 }
 
 #msgList {
@@ -46,13 +161,17 @@ body {
     padding: 10px 0; 
 }
 
-#titleHeader {
+.msgTimestamp {
     margin: 0; 
-    padding: 10px; 
-    background: rgb(43, 54, 65); 
+    padding: 5px; 
+    width: 100%; 
+    text-align: center; 
+    font-size: 0.8rem; 
+    color: #a0a0a0; 
 }
 
-#msgContainer {
+
+#inputContainer {
     position: absolute; 
     display: flex; 
     width: 100%; 
@@ -69,6 +188,10 @@ body {
     outline: none; 
     transition: background 0.2s ease; 
 } 
+#msgBox::placeholder {
+    color: #b3b3b3; 
+    font-style: italic; 
+}
 
 #msgBox:hover {
     background: #303b48; 
@@ -89,4 +212,21 @@ body {
 
 #sendBtn:hover {
     background: #232b35; 
-}
+} 
+#sendBtn:hover .heroIcon { 
+    stroke: none; 
+    fill: white; 
+} 
+
+.heroIcon {
+    width: 20px; 
+    height: 20px; 
+    margin: 0 5px; 
+    stroke: white; 
+    fill: none; 
+} 
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+} 
