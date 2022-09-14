@@ -15,6 +15,20 @@ body {
     font-family: 'Century Gothic', CenturyGothic, AppleGothic, sans-serif; 
 }
 
+::-webkit-scrollbar-track {
+    /* box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);  */
+	background-color: #2b3641; 
+} 
+::-webkit-scrollbar {
+    width: 10px; 
+	background-color: #2b3641; 
+}
+::-webkit-scrollbar-thumb {
+    background-color: #1b2229; 
+	/* border: 2px solid #555555;  */
+} 
+
 #loadingModal {
     position: absolute; 
     display: flex; 
@@ -137,24 +151,10 @@ body {
 
 #msgList {
     margin: 0; 
-    /* padding: 0;  */
-    max-height: 83vh; 
+    padding: 10px 20px; 
+    max-height: 80vh; 
     overflow-y: auto;
     list-style: none;
-}
-
-#msgList::-webkit-scrollbar-track {
-    /* box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);  */
-	background-color: #2b3641; 
-} 
-#msgList::-webkit-scrollbar {
-    width: 10px; 
-	background-color: #2b3641; 
-}
-#msgList::-webkit-scrollbar-thumb {
-    background-color: #1b2229; 
-	/* border: 2px solid #555555;  */
 }
 
 #msgList li {
@@ -166,10 +166,17 @@ body {
     padding: 5px; 
     width: 100%; 
     text-align: center; 
-    font-size: 0.8rem; 
+    font-size: 0.7rem; 
     color: #a0a0a0; 
 }
-
+.msgUsername {
+    margin: 0; 
+    padding: 5px 10px; 
+    width: fit-content; 
+    font-weight: 900; 
+    background: #1e262d; 
+    border-radius: 5px; 
+}
 
 #inputContainer {
     position: absolute; 
@@ -181,12 +188,17 @@ body {
 #msgBox {
     padding: 15px; 
     width: 100%; 
+    height: auto; 
+    max-height: 50vh; 
+    overflow: hidden; 
+    font-family: inherit; 
     font-size: 15px; 
     color: white; 
     background:#2b3641; 
     border: none; 
     outline: none; 
-    transition: background 0.2s ease; 
+    resize: none; 
+    transition: all 0.2s ease; 
 } 
 #msgBox::placeholder {
     color: #b3b3b3; 
@@ -217,6 +229,12 @@ body {
     stroke: none; 
     fill: white; 
 } 
+
+[placeholder]:empty::before {
+    content: attr(placeholder); 
+    color: #b3b3b3; 
+    font-style: italic; 
+}
 
 .heroIcon {
     width: 20px; 

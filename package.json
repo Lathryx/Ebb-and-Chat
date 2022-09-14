@@ -10,6 +10,8 @@
   "author": "lathryx",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.18.1",
+    "ip": "^1.1.8",
     "requirejs": "^2.3.6",
     "socket.io": "^4.5.2"
   },

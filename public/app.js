@@ -14,11 +14,11 @@ socket.on("disconnect", () => {
 socket.on("update", data => {
     console.log(data); 
     messages = data; 
-    let scrolled = msgList.scrollTop >= msgList.scrollHeight-msgList.scrollHeight*0.25; 
+    let scrolled = msgList.scrollTop >= msgList.scrollHeight/2; 
     // console.log("1", msgList.scrollTop, "2", msgList.scrollHeight); 
     // console.log(msgBox.style); 
     msgList.innerHTML = messages.map(msg => {
-        return `<li><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> ${msg.name}: ${msg.msg}</li>`; 
+        return `<li><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> <span class="msgUsername">${msg.name}</span> ${msg.msg}</li>`; 
     }).join(''); 
     if (scrolled) msgList.scrollTop = msgList.scrollHeight; 
     // console.log("1", msgList.scrollTop, "2", msgList.scrollHeight); 
@@ -44,6 +44,8 @@ let currentRoom = "general";
 roomName.innerText = `#${currentRoom}`; 
 
 document.addEventListener("keyup", e => {
+    msgBox.style.height = "auto"; 
+    msgBox.style.height = (msgBox.scrollHeight)+"px"; 
     if (msgBox !== document.activeElement) {
         if (/^[a-z0-9]$/i.test(e.key)) {
             msgBox.focus(); 
@@ -70,7 +72,10 @@ roomList.addEventListener("click", e => {
 }); 
 
 function sendMessage(e) {
+    e.preventDefault(); 
     if (msgBox.value === "") return; 
+    // msgBox.style.height = "1px"; 
+    // msgBox.style.height = (msgBox.scrollHeight)+"px"; 
     if (e.key === "Enter") {
         socket.emit("new_message", {msg: msgBox.value, to: currentRoom}); 
         msgBox.value = ""; 

@@ -1,4 +1,11 @@
+const ip = require("ip").address(); 
+console.log("Server's Local Network IP:", ip); 
+
 const { Server } = require("socket.io"); 
+const express = require("express"); 
+const app = express(); 
+
+app.use(express.static("public")); 
 
 const io = new Server({
     cors: {
@@ -51,4 +58,5 @@ io.on("connection", socket => {
 }); 
 
 io.listen(3000); 
+app.listen(8080); 
 console.log("Listening on port 3000!"); 
