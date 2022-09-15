@@ -1,4 +1,7 @@
-const socket = io("http://localhost:3000"); 
+const ip = "10.0.0.20"; 
+// School: 10.214.163.139 
+// Home: 10.0.0.20 
+const socket = (ip) ? io(`http://${ip}:3000`) : io(); 
 
 socket.on("connect", () => {
     console.log("Connected!"); 
@@ -17,8 +20,18 @@ socket.on("update", data => {
     let scrolled = msgList.scrollTop >= msgList.scrollHeight/2; 
     // console.log("1", msgList.scrollTop, "2", msgList.scrollHeight); 
     // console.log(msgBox.style); 
-    msgList.innerHTML = messages.map(msg => {
-        return `<li><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> <span class="msgUsername">${msg.name}</span> ${msg.msg}</li>`; 
+
+    let prevMsg = messages[0]; 
+    msgList.innerHTML = messages.map((msg, i) => {
+        let msgHTML = `<li><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span><p>${msg.msg}</p></li>`; 
+        if (prevMsg) console.log(msg.id, prevMsg.id); 
+        if (i === 0 || msg.id !== prevMsg.id) { 
+            msgHTML = `<p class="msgUsername">${msg.name}</p>` + msgHTML; 
+        } // else { 
+        //     msgHTML = `<p class="msgUsername">${msg.name}</p><li><p><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> ${msg.msg}</p></li>`; 
+        // } 
+        prevMsg = msg; 
+        return msgHTML; 
     }).join(''); 
     if (scrolled) msgList.scrollTop = msgList.scrollHeight; 
     // console.log("1", msgList.scrollTop, "2", msgList.scrollHeight); 
@@ -27,7 +40,7 @@ socket.on("update", data => {
 socket.on("rooms", data => {
     console.log(data); 
     roomList.innerHTML = data.map(room => {
-        return `<li data-room=${room}>#${room}</li>`; 
+        return `<li class="${(room === currentRoom) ? "activeRoom" : ""}" data-room="${room}">#${room}</li>`; 
     }).join(''); 
 }); 
 
@@ -39,11 +52,21 @@ let msgList = document.getElementById("msgList");
 let msgBox = document.getElementById("msgBox"); 
 let sendBtn = document.getElementById("sendBtn"); 
 
+// msgList.scrollTop = msgList.scrollHeight; 
+msgBox.style.height = "auto"; 
+msgBox.style.height = (msgBox.scrollHeight)+"px"; 
+
 let messages = []; 
 let currentRoom = "general"; 
 roomName.innerText = `#${currentRoom}`; 
+// let prevKey = ""; 
 
-document.addEventListener("keyup", e => {
+// keymage('shift+enter', () => {
+//     console.log("Shift+Enter"); 
+// }); 
+
+document.addEventListener("keydown", e => {
+    // console.log(e); 
     msgBox.style.height = "auto"; 
     msgBox.style.height = (msgBox.scrollHeight)+"px"; 
     if (msgBox !== document.activeElement) {
@@ -52,13 +75,15 @@ document.addEventListener("keyup", e => {
             msgBox.value += e.key; 
         }
     }
+    // console.log("doc", prevKey, e.key); 
+    // prevKey = e.key; 
 }); 
 
 // msgList.addEventListener("scroll", () => console.log(msgList.scrollTop, msgList.scrollHeight)); 
 
-msgBox.addEventListener("keyup", sendMessage); 
+// msgBox.addEventListener("keyup", sendMessage); 
 
-sendBtn.addEventListener("click", sendMessage); 
+sendBtn.addEventListener("click", () => sendMessage()); 
 
 roomList.addEventListener("click", e => {
     if (e.target.tagName === "LI") { 
@@ -68,17 +93,39 @@ roomList.addEventListener("click", e => {
         socket.emit("switchRoom", {from: currentRoom, to: room}); 
         currentRoom = room; 
         roomName.innerText = `#${currentRoom}`; 
+        roomList.querySelector(".activeRoom").classList.remove("activeRoom"); 
+        e.target.classList.add("activeRoom"); 
     } 
 }); 
 
-function sendMessage(e) {
-    e.preventDefault(); 
+function sendMessage() {
+    // e.preventDefault(); 
+    // console.log(prevKey, e.key); 
     if (msgBox.value === "") return; 
     // msgBox.style.height = "1px"; 
     // msgBox.style.height = (msgBox.scrollHeight)+"px"; 
-    if (e.key === "Enter") {
-        socket.emit("new_message", {msg: msgBox.value, to: currentRoom}); 
-        msgBox.value = ""; 
+
+    socket.emit("new_message", {msg: msgBox.value, to: currentRoom}); 
+    msgBox.value = ""; 
+    msgBox.style.height = "auto"; 
+    msgBox.style.height = (msgBox.scrollHeight)+"px"; 
+} 
+
+let keyMap = {}; 
+onkeydown = onkeyup = function(e) {
+    e = e || event; 
+    keyMap[e.key] = e.type == 'keydown'; 
+    if (keyMap["Shift"] && keyMap["Enter"]) {
+        e.preventDefault(); 
+        msgBox.value += "\n"; 
+        msgBox.style.height = "auto"; 
+        msgBox.style.height = (msgBox.scrollHeight)+"px";     
+        return; 
+    } 
+    if (keyMap["Enter"]) {
+        e.preventDefault(); 
+        sendMessage(); 
+        return; 
     } 
 } 
 

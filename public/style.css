@@ -51,8 +51,10 @@ body {
     height: 100px; 
     border: 10px solid rgb(43, 54, 65); 
     border-top: 10px solid rgb(53, 64, 75); 
-    border-radius: 50%; 
+    border-radius: 50%; ;
     animation: spin 1s linear infinite; 
+    -webkit-animation: spin 1s linear infinite; 
+    -moz-animation: spin 1s linear infinite; 
 }
 
 #titleHeader {
@@ -139,6 +141,13 @@ body {
     background: #2b3a45; 
 } 
 
+.activeRoom {
+    background: #2b3a45 !important;  
+}
+.activeRoom:hover {
+    background: rgb(38, 53, 64) !important;  
+}
+
 #msgContainer {
     position: absolute; 
     right: 0; 
@@ -152,25 +161,35 @@ body {
 #msgList {
     margin: 0; 
     padding: 10px 20px; 
-    max-height: 80vh; 
+    max-height: 70vh; 
     overflow-y: auto;
-    list-style: none;
+    overflow-x: hidden; 
+    list-style: none; 
 }
 
 #msgList li {
-    padding: 10px 0; 
+    margin-left: 10px; 
+    padding: 0; 
+} 
+#msgList li p {
+    /* height: auto;  */
+    display: inline; 
+    word-wrap: break-word; 
+    line-height: 1.3rem; 
 }
 
 .msgTimestamp {
-    margin: 0; 
+    margin: 5px; 
     padding: 5px; 
-    width: 100%; 
+    display: inline; 
+    width: fit-content; 
     text-align: center; 
     font-size: 0.7rem; 
     color: #a0a0a0; 
+    white-space: nowrap; 
 }
 .msgUsername {
-    margin: 0; 
+    margin: 20px 0 5px 0; 
     padding: 5px 10px; 
     width: fit-content; 
     font-weight: 900; 
@@ -181,6 +200,7 @@ body {
 #inputContainer {
     position: absolute; 
     display: flex; 
+    align-items: flex-end;
     width: 100%; 
     bottom: 0; 
 } 
@@ -189,8 +209,8 @@ body {
     padding: 15px; 
     width: 100%; 
     height: auto; 
-    max-height: 50vh; 
-    overflow: hidden; 
+    max-height: 25vh; 
+    overflow: auto; 
     font-family: inherit; 
     font-size: 15px; 
     color: white; 
@@ -198,7 +218,9 @@ body {
     border: none; 
     outline: none; 
     resize: none; 
+    border-radius: 0 10px 0 0; 
     transition: all 0.2s ease; 
+    -webkit-transition: all 0.2s ease; 
 } 
 #msgBox::placeholder {
     color: #b3b3b3; 
@@ -215,6 +237,7 @@ body {
 
 #sendBtn {
     padding: 15px; 
+    /* max-height: 25vh;  */
     font-size: 15px;     
     color: white; 
     background:#262f39; 
