@@ -2,9 +2,18 @@ const ip = "10.0.0.20";
 // School: 10.214.163.139 
 // Home: 10.0.0.20 
 const socket = (ip) ? io(`http://${ip}:3000`) : io(); 
+const device_id = Cookies.get("device_id"); 
+let user; 
 
 socket.on("connect", () => {
     console.log("Connected!"); 
+    socket.emit("user_join", {id: device_id}, (user) => {
+        if (!device_id) Cookies.set("device_id", user.id); 
+        user = user; 
+        console.log(user); 
+    }); 
+
+
     socket.emit("switchRoom", {to: currentRoom}); 
     loadingModal.style.display = "none"; 
 }); 
@@ -70,9 +79,9 @@ document.addEventListener("keydown", e => {
     msgBox.style.height = "auto"; 
     msgBox.style.height = (msgBox.scrollHeight)+"px"; 
     if (msgBox !== document.activeElement) {
-        if (/^[a-z0-9]$/i.test(e.key)) {
+        if (/^[a-z0-9]$/i.test(e.key) && !keyMap["Control"]) {
             msgBox.focus(); 
-            msgBox.value += e.key; 
+            // msgBox.value += e.key; 
         }
     }
     // console.log("doc", prevKey, e.key); 
