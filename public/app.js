@@ -1,20 +1,23 @@
-const ip = "10.0.0.20"; 
-// School: 10.214.163.139 
-// Home: 10.0.0.20 
+const ip = "192.168.1.88"; 
+// School: 
+    // School Laptop: 10.214.163.139 
+    // MacBook: 10.214.160.253 
+// Home: 10.0.0.20, 192.168.1.88 
 const socket = (ip) ? io(`http://${ip}:3000`) : io(); 
 const device_id = Cookies.get("device_id"); 
 let user; 
 
 socket.on("connect", () => {
     console.log("Connected!"); 
-    socket.emit("user_join", {id: device_id}, (user) => {
-        if (!device_id) Cookies.set("device_id", user.id); 
-        user = user; 
+    socket.emit("user_join", {id: device_id}, (data) => {
+        if (!device_id) Cookies.set("device_id", data.id); 
+        user = data; 
         console.log(user); 
     }); 
 
-
-    socket.emit("switchRoom", {to: currentRoom}); 
+    socket.emit("switchRoom", {to: currentRoom}, () => {
+        msgList.scrollTop = msgList.scrollHeight; 
+    }); 
     loadingModal.style.display = "none"; 
 }); 
 
@@ -32,16 +35,40 @@ socket.on("update", data => {
 
     let prevMsg = messages[0]; 
     msgList.innerHTML = messages.map((msg, i) => {
-        let msgHTML = `<li><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span><p>${msg.msg}</p></li>`; 
-        if (prevMsg) console.log(msg.id, prevMsg.id); 
-        if (i === 0 || msg.id !== prevMsg.id) { 
-            msgHTML = `<p class="msgUsername">${msg.name}</p>` + msgHTML; 
-        } // else { 
-        //     msgHTML = `<p class="msgUsername">${msg.name}</p><li><p><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> ${msg.msg}</p></li>`; 
-        // } 
-        prevMsg = msg; 
+        let msgHTML; 
+
+        if (msg.to === user.id) {
+            msgHTML = `<li class="privateMessage"><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> Private message from <span class="msgUsername">${msg.name}<p>${msg.msg}</p></li>`; 
+        } else {
+            msgHTML = `<li><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span><p>${msg.msg}</p></li>`; 
+            // if (prevMsg) console.log(msg.id, prevMsg.id); 
+            if (i === 0 || msg.id !== prevMsg.id) { 
+                msgHTML = `<p class="msgUsername">${msg.name}</p>${msgHTML}`; 
+            } // else { 
+            //     msgHTML = `<p class="msgUsername">${msg.name}</p><li><p><span class="msgTimestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span> ${msg.msg}</p></li>`; 
+            // } 
+            prevMsg = msg; 
+        } 
+
         return msgHTML; 
     }).join(''); 
+
+    let roomLinks = msgList.querySelectorAll(".roomLink"); 
+    roomLinks.forEach(link => {
+        link.addEventListener("click", e => {
+            let room = e.target.dataset.room; 
+            if (room === currentRoom) return; 
+
+            socket.emit("switchRoom", {from: currentRoom, to: room}, () => {
+                currentRoom = room; 
+                roomName.innerText = `#${currentRoom}`; 
+                roomList.querySelector(".activeRoom").classList.remove("activeRoom"); 
+                roomList.querySelector(`[data-room="${currentRoom}"]`).classList.add("activeRoom"); 
+                msgList.scrollTop = msgList.scrollHeight; 
+            }); 
+        }); 
+    }); 
+
     if (scrolled) msgList.scrollTop = msgList.scrollHeight; 
     // console.log("1", msgList.scrollTop, "2", msgList.scrollHeight); 
 }); 
@@ -99,18 +126,20 @@ roomList.addEventListener("click", e => {
         let room = e.target.dataset.room; 
         if (room === currentRoom) return; 
 
-        socket.emit("switchRoom", {from: currentRoom, to: room}); 
-        currentRoom = room; 
-        roomName.innerText = `#${currentRoom}`; 
-        roomList.querySelector(".activeRoom").classList.remove("activeRoom"); 
-        e.target.classList.add("activeRoom"); 
+        socket.emit("switchRoom", {from: currentRoom, to: room}, () => {
+            currentRoom = room; 
+            roomName.innerText = `#${currentRoom}`; 
+            roomList.querySelector(".activeRoom").classList.remove("activeRoom"); 
+            e.target.classList.add("activeRoom"); 
+            msgList.scrollTop = msgList.scrollHeight; 
+        }); 
     } 
 }); 
 
 function sendMessage() {
     // e.preventDefault(); 
     // console.log(prevKey, e.key); 
-    if (msgBox.value === "") return; 
+    if (msgBox.value.trim() === "") return; 
     // msgBox.style.height = "1px"; 
     // msgBox.style.height = (msgBox.scrollHeight)+"px"; 
 
@@ -122,6 +151,11 @@ function sendMessage() {
 
 let keyMap = {}; 
 onkeydown = onkeyup = function(e) {
+    msgBox.style.height = "auto"; 
+    msgBox.style.height = (msgBox.scrollHeight)+"px"; 
+    let scrolled = msgList.scrollTop >= msgList.scrollHeight/2; 
+    if (scrolled) msgList.scrollTop = msgList.scrollHeight; 
+
     e = e || event; 
     keyMap[e.key] = e.type == 'keydown'; 
     if (keyMap["Shift"] && keyMap["Enter"]) {

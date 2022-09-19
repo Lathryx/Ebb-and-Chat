@@ -8,7 +8,7 @@ const uuidv4 = require("uuid").v4;
 const fs = require("fs"); 
 
 const users = require("./users.json").users; 
-const messages = require("./messages.json"); 
+let messages = require("./messages.json"); 
 
 app.use(express.static("public")); 
 
@@ -81,11 +81,48 @@ io.on("connection", socket => {
 
             users.find(user => user.id === currentUser.id).name = currentUser.name; 
             fs.writeFileSync("./users.json", JSON.stringify({users: users})); 
-        } else {
+        } else if (data.msg.startsWith("/whisper")) { 
+            data.to = users.find(user => user.name === data.msg.trim().split(' ')[1]).socket_id; 
+            data.msg = data.msg.trim().split(' ').slice(2).join(' '); 
+
             data.id = currentUser.id; 
             data.name = currentUser.name; 
             data.timestamp = Date.now(); 
-            data.timestampFormatted = new Date(data.timestamp).toLocaleTimeString(); 
+
+            // if (!messages[data.to]) messages[data.to] = []; 
+            // messages[data.to].push(data); 
+            // refactor later: client to have list of PMs exclusive to list of messages, then concat them, and sort by timestamp (chronological order) :+1: 
+            // (do the same for system/server messages too) 
+        } else {
+            if (data.msg.includes("#")) {
+                let positions = []; 
+
+                let re = /\B\#\w\w+\b/g; // /(\b#\S+\b)/ig; 
+                let matches = [...data.msg.matchAll(re)]; 
+                console.log(matches); 
+                matches.forEach(match => {
+                    console.log("yup match", Object.keys(messages).includes(match[0].slice(1)), Object.keys(messages), match[0].slice(1)); 
+                    if (Object.keys(messages).includes(match[0].slice(1))) {
+                        positions.push([match.index, match.index+match[0].length, match[0].slice(1)]); 
+                    }
+                }); 
+
+                let newMsg = data.msg.split(''); 
+                positions.reverse().forEach(pos => {
+                    newMsg.splice(pos[1], 0, "</span>"); 
+                    newMsg.splice(pos[0], 0, `<span class="roomLink" data-room="${pos[2]}">`); 
+
+                    // console.log(data.msg.split('').splice(0, pos[1], "</span>").join('')); 
+                    // data.msg = `<span class="hashtag">${data.msg[pos[0]]}`; 
+                }); 
+
+                data.msg = newMsg.join(''); 
+                console.log(data.msg); 
+            }
+            data.id = currentUser.id; 
+            data.name = currentUser.name; 
+            data.timestamp = Date.now(); 
+            // data.timestampFormatted = new Date(data.timestamp).toLocaleTimeString(); 
             messages[data.to].push(data); 
         }
 
@@ -93,11 +130,13 @@ io.on("connection", socket => {
         io.to(data.to).emit("update", messages[data.to]); 
     }); 
 
-    socket.on("switchRoom", data => {
+    socket.on("switchRoom", (data, callback) => {
         if (data.from) socket.leave(data.from); 
         socket.join(data.to); 
         socket.emit("update", messages[data.to]); 
         console.log(`Switched user ${currentUser.id} to room #${data.to}... `); 
+
+        if (callback) callback(); 
     }); 
 }); 
 
